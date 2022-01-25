@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"sync"
 
 	"github.com/gin-gonic/gin"
 )
@@ -27,8 +28,11 @@ func Handler() gin.HandlerFunc {
 		if err != nil {
 			log.Println(err)
 		}
+		m := new(sync.Mutex)
+		m.Lock()
 		for _, v := range handlers {
 			v(msg)
 		}
+		m.Unlock()
 	}
 }
