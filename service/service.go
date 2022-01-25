@@ -1,9 +1,11 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -24,6 +26,7 @@ func Handler() gin.HandlerFunc {
 		if err != nil {
 			log.Println(err)
 		}
+		log.Println(string(r))
 		err = json.Unmarshal(r, &msg)
 		if err != nil {
 			log.Println(err)
@@ -34,5 +37,22 @@ func Handler() gin.HandlerFunc {
 			v(msg)
 		}
 		m.Unlock()
+	}
+}
+
+func SendGroupMsg(msg interface{}, groupID int64) {
+	api := "/send_group_msg"
+	url := Url + Port
+	response := Message{
+		GroupID: groupID,
+		Message: msg,
+	}
+	r, err := json.Marshal(&response)
+	if err != nil {
+		log.Println(err)
+	}
+	_, err = http.Post(url+api, "application/json", bytes.NewBuffer(r))
+	if err != nil {
+		log.Println(err)
 	}
 }

@@ -1,8 +1,23 @@
 package service
 
 type Request struct {
-	MessageID string `json:"message_id"`
-	GroupID   string `json:"group_id"`
+	MessageID int32  `json:"message_id"`
+	GroupID   int64  `json:"group_id"`
 	Message   string `json:"message"`
-	UserID    string `json:"user_id"`
+	UserID    int64  `json:"user_id"`
+}
+
+type Message struct {
+	GroupID int64       `json:"group_id"`
+	Message interface{} `json:"message"`
+}
+
+type CQMessage struct {
+	Type string      `json:"type"`
+	Data interface{} `json:"data"`
+}
+
+type CQImage struct {
+	File string `json:"file"`
+	Url  string `json:"url"`
 }
