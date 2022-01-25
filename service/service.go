@@ -1,6 +1,12 @@
 package service
 
-import "github.com/gin-gonic/gin"
+import (
+	"encoding/json"
+	"io/ioutil"
+	"log"
+
+	"github.com/gin-gonic/gin"
+)
 
 var handlers []func(Request)
 
@@ -12,6 +18,17 @@ func Run(port string) {
 
 func Handler() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-
+		var msg Request
+		r, err := ioutil.ReadAll(ctx.Request.Body)
+		if err != nil {
+			log.Println(err)
+		}
+		err = json.Unmarshal(r, &msg)
+		if err != nil {
+			log.Println(err)
+		}
+		for _, v := range handlers {
+			v(msg)
+		}
 	}
 }
