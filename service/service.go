@@ -41,7 +41,7 @@ func Handler() gin.HandlerFunc {
 		}
 		msgMap[msg.MessageID] = 1
 		for _, v := range handlers {
-			v(msg)
+			go v(msg)
 		}
 		m.Unlock()
 	}
