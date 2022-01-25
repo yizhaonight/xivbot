@@ -2,8 +2,11 @@ package service
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"math/rand"
+	"net/http"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -11,7 +14,7 @@ import (
 	"xivbot/models"
 	"xivbot/util"
 
-	_ "github.com/google/uuid"
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -52,15 +55,42 @@ func PixivHandler(msg Request) {
 		SendGroupMsg(response, msg.GroupID)
 	}
 
-	if ok, _ := regexp.MatchString(`(^添加色图)|(添加色图$)`, msg.Message); ok {
+	if strings.Contains(msg.Message, "添加色图") {
 		eventMap, err := util.ParseEvent(msg.Message)
 		if err != nil {
 			log.Println(err)
 		}
 		if _, okk := eventMap["CQ"]; okk {
-			//link := eventMap["url"]
-			//id := uuid.New()
-
+			link := eventMap["url"].(string)
+			id := uuid.New().String()
+			file := id + ".jpg"
+			out, err := os.Create(Path + "pixiv/" + file)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			defer out.Close()
+			resp, err := http.Get(link)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			defer resp.Body.Close()
+			_, err = io.Copy(out, resp.Body)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			ero := models.Ero{
+				Src: Url + "/pixiv/" + file,
+			}
+			err = ero.Insert()
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			response := "添加成功"
+			SendGroupMsg(response, msg.GroupID)
 		}
 	}
 }
