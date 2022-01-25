@@ -5,6 +5,8 @@ import (
 	"sync"
 )
 
+const REPEAT = 4
+
 var repeatMap map[int64]MessageCounter
 
 func init() {
@@ -27,7 +29,7 @@ func RepeatHandler(msg Request) {
 	}
 	if v.Content == msg.Message {
 		v.Count += 1
-		if v.Count == 3 {
+		if v.Count == REPEAT {
 			v.Count = 0
 			SendGroupMsg(msg.Message, msg.GroupID)
 		}

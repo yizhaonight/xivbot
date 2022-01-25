@@ -33,6 +33,9 @@ func Handler() gin.HandlerFunc {
 		if err != nil {
 			log.Println(err)
 		}
+		if msg.GroupID == 0 {
+			return
+		}
 		m := new(sync.Mutex)
 		m.Lock()
 		msgMap = make(map[int32]int)

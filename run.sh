@@ -1,2 +1,2 @@
 go build
-./local
+./xivbot

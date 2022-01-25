@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"xivbot/models"
 	"xivbot/util"
@@ -18,16 +19,18 @@ import (
 )
 
 func init() {
-	handlers = append(handlers, TextHandler)
+	handlers = append(handlers, KeywordHandler)
 	handlers = append(handlers, PixivHandler)
 	handlers = append(handlers, SenpaiHandler)
 }
 
-func TextHandler(msg Request) {
+func KeywordHandler(msg Request) {
 
 }
 
 func PixivHandler(msg Request) {
+	m := new(sync.Mutex)
+	m.Lock()
 	// Query pixiv pictures
 	if ok, _ := regexp.MatchString(`^(!|！)色图`, msg.Message); ok {
 		split := strings.Split(msg.Message, " ")
@@ -95,6 +98,7 @@ func PixivHandler(msg Request) {
 			SendGroupMsg(response, msg.GroupID)
 		}
 	}
+	m.Unlock()
 }
 
 func SenpaiHandler(msg Request) {

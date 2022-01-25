@@ -2,8 +2,6 @@ package models
 
 import (
 	"xivbot/util"
-
-	"gorm.io/gorm"
 )
 
 func init() {
@@ -11,7 +9,6 @@ func init() {
 }
 
 type Reaction struct {
-	gorm.Model
 	Word     string
 	Response string
 }
