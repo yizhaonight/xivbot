@@ -13,6 +13,8 @@ import (
 
 var handlers []func(Request)
 
+var msgMap map[int32]int
+
 func Run(port string) {
 	engine := gin.Default()
 	engine.POST("/", Handler())
@@ -33,6 +35,11 @@ func Handler() gin.HandlerFunc {
 		}
 		m := new(sync.Mutex)
 		m.Lock()
+		msgMap = make(map[int32]int)
+		if _, ok := msgMap[msg.MessageID]; ok {
+			return
+		}
+		msgMap[msg.MessageID] = 1
 		for _, v := range handlers {
 			v(msg)
 		}

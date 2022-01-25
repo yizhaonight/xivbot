@@ -28,6 +28,7 @@ func TextHandler(msg Request) {
 }
 
 func PixivHandler(msg Request) {
+	// Query pixiv pictures
 	if ok, _ := regexp.MatchString(`^(!|！)色图`, msg.Message); ok {
 		split := strings.Split(msg.Message, " ")
 		ero := models.Ero{}
@@ -55,6 +56,7 @@ func PixivHandler(msg Request) {
 		SendGroupMsg(response, msg.GroupID)
 	}
 
+	// Add pixiv pictures
 	if strings.Contains(msg.Message, "添加色图") {
 		eventMap, err := util.ParseEvent(msg.Message)
 		if err != nil {
