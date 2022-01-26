@@ -1,6 +1,5 @@
 # XIVBOT
-
-- Chinese only. Not supported for other languages.
+- Server for parsing messages sent by go-cqhttp.
 - go-cqhttp: [https://github.com/Mrs4s/go-cqhttp]()
-- Server for Parsing Messages Sent by go-cqhttp.
-- Returns multiple messages, including ero pictures/yajyu senpai pictures/ffxiv related information.
+- Chinese only. Not supported for other languages.
+- Returns multiple types of messages, including ero pictures/yajyu senpai pictures/ffxiv related information.
