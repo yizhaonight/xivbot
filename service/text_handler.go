@@ -51,7 +51,20 @@ func PixivHandler(msg Request) {
 			if okk, _ := regexp.MatchString(`^--`, split[1]); okk {
 				cmd := strings.Split(split[1], "--")[1]
 				if cmd == "count" {
-					response := fmt.Sprintf("色图数量: %s", strconv.Itoa(len(eros)))
+					response := []CQMessage{
+						{
+							Type: "reply",
+							Data: CQReply{
+								ID: msg.MessageID,
+							},
+						},
+						{
+							Type: "text",
+							Data: CQText{
+								Text: fmt.Sprintf("色图数量: %s", strconv.Itoa(len(eros))),
+							},
+						},
+					}
 					SendGroupMsg(response, msg.GroupID)
 					return
 				}
@@ -111,14 +124,92 @@ func PixivHandler(msg Request) {
 				}
 			}
 		}
-		response := fmt.Sprintf("添加%d张图片成功", len(events))
+		response := []CQMessage{
+			{
+				Type: "reply",
+				Data: CQReply{
+					ID: msg.MessageID,
+				},
+			},
+			{
+				Type: "text",
+				Data: CQText{
+					Text: fmt.Sprintf("添加%d张色图成功", len(events)),
+				},
+			},
+		}
 		SendGroupMsg(response, msg.GroupID)
 	}
 	m.Unlock()
 }
 
 func SenpaiHandler(msg Request) {
-
+	m := new(sync.Mutex)
+	m.Lock()
+	if strings.Contains("114514", msg.Message) || strings.Contains("1919810", msg.Message) {
+		senpai := models.Senpai{}
+		senpais, err := senpai.Find()
+		if err != nil {
+			log.Println(err)
+		}
+		rand.Seed(time.Now().Unix())
+		response, _ := ImageResponse(1, senpais)
+		SendGroupMsg(response, msg.GroupID)
+	}
+	if strings.Contains(msg.Message, "添加臭图") {
+		events, err := util.ParseEvent(msg.Message)
+		if err != nil {
+			log.Println(err)
+		}
+		for _, v := range events {
+			if vv, okk := v["CQ"]; okk && vv == "image" {
+				link := v["url"].(string)
+				id := uuid.New().String()
+				file := id + ".jpg"
+				out, err := os.Create(Path + "senpai/" + file)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				defer out.Close()
+				resp, err := http.Get(link)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				defer resp.Body.Close()
+				_, err = io.Copy(out, resp.Body)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				senpai := models.Senpai{
+					Src: Url + "/senpai/" + file,
+				}
+				err = senpai.Insert()
+				if err != nil {
+					log.Println(err)
+					return
+				}
+			}
+		}
+		response := []CQMessage{
+			{
+				Type: "reply",
+				Data: CQReply{
+					ID: msg.MessageID,
+				},
+			},
+			{
+				Type: "text",
+				Data: CQText{
+					Text: fmt.Sprintf("添加%d张臭图成功", len(events)),
+				},
+			},
+		}
+		SendGroupMsg(response, msg.GroupID)
+	}
+	m.Unlock()
 }
 
 func ImageResponse(count int, l []string) (response []CQMessage, err error) {
