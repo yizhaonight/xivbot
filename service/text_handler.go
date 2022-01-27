@@ -32,6 +32,7 @@ func KeywordHandler(msg Request) {
 	if ok, _ := regexp.MatchString(`^(?:!|！|\/|-|--)help$`, msg.Message); ok {
 		response := Help
 		SendGroupMsg(response, msg.GroupID)
+		return
 	}
 
 	var react = models.Reaction{GroupID: msg.GroupID}
@@ -44,6 +45,14 @@ func KeywordHandler(msg Request) {
 		split := strings.Split(msg.Message, "有人说")
 		condition := strings.Split(split[1], "回复")[0]
 		reply := strings.Split(split[1], "回复")[1]
+		_, e := util.ParseEvent(condition)
+		if e == nil {
+			return
+		}
+		_, e = util.ParseEvent(reply)
+		if e == nil {
+			return
+		}
 		for _, v := range reacts {
 			if v.Word == condition {
 				response := Reply(msg.MessageID, "规则已存在")
