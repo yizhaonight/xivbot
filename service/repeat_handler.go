@@ -39,7 +39,7 @@ func RepeatHandler(msg Request) {
 		return
 	}
 	repeatMap[msg.GroupID] = msgCounter
-	log.Println(repeatMap)
+	log.Println("Repeat Count:", repeatMap)
 	m.Unlock()
 }
 

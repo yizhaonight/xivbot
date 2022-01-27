@@ -60,8 +60,9 @@ func WikiHandler(msg Request) {
 
 func FormatItem(data EmbeddedData) (response string) {
 	response = fmt.Sprintf(
-		"名称: %s\n描述: %s\n品级: %s\n来源: \n",
+		"名称: %s\n日文名: %s\n描述: %s\n品级: %s\n来源: \n",
 		data.Name,
+		data.JPName,
 		data.Description,
 		strconv.Itoa(data.ILevel),
 	)

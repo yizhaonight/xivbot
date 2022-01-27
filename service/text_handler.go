@@ -61,42 +61,44 @@ func PixivHandler(msg Request) {
 
 	// Add pixiv pictures
 	if strings.Contains(msg.Message, "添加色图") {
-		eventMap, err := util.ParseEvent(msg.Message)
+		events, err := util.ParseEvent(msg.Message)
 		if err != nil {
 			log.Println(err)
 		}
-		if _, okk := eventMap["CQ"]; okk {
-			link := eventMap["url"].(string)
-			id := uuid.New().String()
-			file := id + ".jpg"
-			out, err := os.Create(Path + "pixiv/" + file)
-			if err != nil {
-				log.Println(err)
-				return
+		for _, v := range events {
+			if _, okk := v["CQ"]; okk {
+				link := v["url"].(string)
+				id := uuid.New().String()
+				file := id + ".jpg"
+				out, err := os.Create(Path + "pixiv/" + file)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				defer out.Close()
+				resp, err := http.Get(link)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				defer resp.Body.Close()
+				_, err = io.Copy(out, resp.Body)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				ero := models.Ero{
+					Src: Url + "/pixiv/" + file,
+				}
+				err = ero.Insert()
+				if err != nil {
+					log.Println(err)
+					return
+				}
 			}
-			defer out.Close()
-			resp, err := http.Get(link)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			defer resp.Body.Close()
-			_, err = io.Copy(out, resp.Body)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			ero := models.Ero{
-				Src: Url + "/pixiv/" + file,
-			}
-			err = ero.Insert()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			response := "添加成功"
-			SendGroupMsg(response, msg.GroupID)
 		}
+		response := fmt.Sprintf("添加%d张图片成功", len(events))
+		SendGroupMsg(response, msg.GroupID)
 	}
 	m.Unlock()
 }

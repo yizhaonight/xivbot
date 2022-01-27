@@ -2,31 +2,34 @@ package util
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 )
 
 // event is something like [CQ:face,id=123] as string.
-func ParseEvent(event string) (eventMap map[string]interface{}, err error) {
-	eventMap = make(map[string]interface{})
+func ParseEvent(event string) (events []map[string]interface{}, err error) {
 	reg := regexp.MustCompile(`\[(.*?)\]`)
-	processed := reg.FindStringSubmatch(event)
-	if len(processed) == 0 {
+	matches := reg.FindAll([]byte(event), -1)
+	if len(matches) == 0 {
 		return
 	}
-	split := strings.Split(processed[1], ",")
-	cq := split[0]
-	cqSplit := strings.Split(cq, ":")
-	if len(cqSplit) < 2 {
-		err = errors.New("CQ error")
-		return
+	for _, v := range matches {
+		e := make(map[string]interface{})
+		match := string(v)
+		match = match[1 : len(match)-1]
+		split := strings.Split(match, ",")
+		cq := split[0]
+		cqSplit := strings.Split(cq, ":")
+		if len(cqSplit) < 2 {
+			err = errors.New("CQ error")
+			return
+		}
+		e["CQ"] = cqSplit[1]
+		for i := 1; i < len(split); i++ {
+			ele := strings.Split(split[i], "=")
+			e[ele[0]] = ele[1]
+		}
+		events = append(events, e)
 	}
-	eventMap["CQ"] = cqSplit[1]
-	for i := 1; i < len(split); i++ {
-		ele := strings.Split(split[i], "=")
-		eventMap[ele[0]] = ele[1]
-	}
-	fmt.Println(eventMap)
 	return
 }
