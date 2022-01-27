@@ -16,6 +16,7 @@ var handlers []func(Request)
 var msgMap map[int32]int
 
 func Run(port string) {
+	msgMap = make(map[int32]int)
 	engine := gin.Default()
 	engine.POST("/", Handler())
 	engine.Run(port)
@@ -38,7 +39,6 @@ func Handler() gin.HandlerFunc {
 		}
 		m := new(sync.Mutex)
 		m.Lock()
-		msgMap = make(map[int32]int)
 		if _, ok := msgMap[msg.MessageID]; ok {
 			return
 		}

@@ -33,6 +33,88 @@ func KeywordHandler(msg Request) {
 		response := Help
 		SendGroupMsg(response, msg.GroupID)
 	}
+
+	var react = models.Reaction{GroupID: msg.GroupID}
+	reacts, err := react.FindByGroupID()
+	if err != nil {
+		log.Println(err)
+	}
+	ok, _ := regexp.MatchString(`^有人说`, msg.Message)
+	if (strings.Contains(msg.Message, "回复")) && ok {
+		split := strings.Split(msg.Message, "有人说")
+		condition := strings.Split(split[1], "回复")[0]
+		reply := strings.Split(split[1], "回复")[1]
+		for _, v := range reacts {
+			if v.Word == condition {
+				response := Reply(msg.MessageID, "规则已存在")
+				SendGroupMsg(response, msg.GroupID)
+				return
+			}
+		}
+		r := models.Reaction{
+			Word:     condition,
+			Response: reply,
+			GroupID:  msg.GroupID,
+		}
+		err := r.Insert()
+		if err != nil {
+			log.Println(err)
+		}
+		response := Reply(msg.MessageID, "添加规则成功")
+		SendGroupMsg(response, msg.GroupID)
+		return
+	}
+
+	if ok, _ := regexp.MatchString(`^查看规则$`, msg.Message); ok {
+		var r string
+		if len(reacts) == 0 {
+			r = "当前没有生效的规则"
+		} else {
+			for i, v := range reacts {
+				r += fmt.Sprintf("%d. 有人说%s回复%s\n", i+1, v.Word, v.Response)
+			}
+		}
+		response := Reply(msg.MessageID, r)
+		SendGroupMsg(response, msg.GroupID)
+		return
+	}
+
+	if ok, _ := regexp.MatchString(`^删除规则`, msg.Message); ok {
+		var r string
+		split := strings.Split(msg.Message, "删除规则")
+		condition := split[1]
+		if condition == "" {
+			return
+		}
+		c := 0
+		for _, v := range reacts {
+			if v.Word == condition {
+				c += 1
+			}
+		}
+		if c == 0 {
+			r = "该规则不存在"
+		} else {
+			target := models.Reaction{
+				Word:    condition,
+				GroupID: msg.GroupID,
+			}
+			err := target.DeleteByWord()
+			if err != nil {
+				log.Println(err)
+			}
+			r = "删除成功"
+		}
+		response := Reply(msg.MessageID, r)
+		SendGroupMsg(response, msg.GroupID)
+		return
+	}
+	for _, v := range reacts {
+		if strings.Contains(msg.Message, v.Word) {
+			response := Reply(msg.MessageID, v.Response)
+			SendGroupMsg(response, msg.GroupID)
+		}
+	}
 	m.Unlock()
 }
 
@@ -52,20 +134,7 @@ func PixivHandler(msg Request) {
 			if okk, _ := regexp.MatchString(`^--`, split[1]); okk {
 				cmd := strings.Split(split[1], "--")[1]
 				if cmd == "count" {
-					response := []CQMessage{
-						{
-							Type: "reply",
-							Data: CQReply{
-								ID: msg.MessageID,
-							},
-						},
-						{
-							Type: "text",
-							Data: CQText{
-								Text: fmt.Sprintf("色图数量: %s", strconv.Itoa(len(eros))),
-							},
-						},
-					}
+					response := Reply(msg.MessageID, fmt.Sprintf("色图数量: %d", len(eros)))
 					SendGroupMsg(response, msg.GroupID)
 					return
 				}
@@ -125,20 +194,7 @@ func PixivHandler(msg Request) {
 				}
 			}
 		}
-		response := []CQMessage{
-			{
-				Type: "reply",
-				Data: CQReply{
-					ID: msg.MessageID,
-				},
-			},
-			{
-				Type: "text",
-				Data: CQText{
-					Text: fmt.Sprintf("添加%d张色图成功", len(events)),
-				},
-			},
-		}
+		response := Reply(msg.MessageID, fmt.Sprintf("添加%d张色图成功", len(events)))
 		SendGroupMsg(response, msg.GroupID)
 	}
 	m.Unlock()
@@ -194,20 +250,7 @@ func SenpaiHandler(msg Request) {
 				}
 			}
 		}
-		response := []CQMessage{
-			{
-				Type: "reply",
-				Data: CQReply{
-					ID: msg.MessageID,
-				},
-			},
-			{
-				Type: "text",
-				Data: CQText{
-					Text: fmt.Sprintf("添加%d张臭图成功", len(events)),
-				},
-			},
-		}
+		response := Reply(msg.MessageID, fmt.Sprintf("添加%d张臭图成功", len(events)))
 		SendGroupMsg(response, msg.GroupID)
 	}
 	m.Unlock()
@@ -261,4 +304,21 @@ func ImageResponse(count int, l []string) (response []CQMessage, err error) {
 		})
 	}
 	return
+}
+
+func Reply(msgID int32, text string) []CQMessage {
+	return []CQMessage{
+		{
+			Type: "reply",
+			Data: CQReply{
+				ID: msgID,
+			},
+		},
+		{
+			Type: "text",
+			Data: CQText{
+				Text: text,
+			},
+		},
+	}
 }
