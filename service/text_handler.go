@@ -147,7 +147,7 @@ func PixivHandler(msg Request) {
 func SenpaiHandler(msg Request) {
 	m := new(sync.Mutex)
 	m.Lock()
-	if strings.Contains("114514", msg.Message) || strings.Contains("1919810", msg.Message) {
+	if strings.Contains(msg.Message, "114514") || strings.Contains(msg.Message, "1919810") {
 		senpai := models.Senpai{}
 		senpais, err := senpai.Find()
 		if err != nil {
