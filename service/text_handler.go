@@ -66,7 +66,7 @@ func PixivHandler(msg Request) {
 			log.Println(err)
 		}
 		for _, v := range events {
-			if _, okk := v["CQ"]; okk {
+			if vv, okk := v["CQ"]; okk && vv == "image" {
 				link := v["url"].(string)
 				id := uuid.New().String()
 				file := id + ".jpg"
