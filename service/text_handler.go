@@ -20,6 +20,7 @@ import (
 )
 
 func init() {
+	handlers = append(handlers, TestHandler)
 	handlers = append(handlers, KeywordHandler)
 	handlers = append(handlers, PixivHandler)
 	handlers = append(handlers, SenpaiHandler)
@@ -210,6 +211,39 @@ func SenpaiHandler(msg Request) {
 		SendGroupMsg(response, msg.GroupID)
 	}
 	m.Unlock()
+}
+
+func TestHandler(msg Request) {
+	if ok, _ := regexp.MatchString(`^(?:--测试|--test)`, msg.Message); ok {
+		events, err := util.ParseEvent(msg.Message)
+		if err != nil {
+			log.Println(err)
+		}
+		for _, v := range events {
+			if vv, okk := v["CQ"]; okk && vv == "image" {
+				link := v["url"].(string)
+				id := uuid.New().String()
+				file := id + ".jpg"
+				out, err := os.Create(Path + "test/" + file)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				defer out.Close()
+				resp, err := http.Get(link)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+				defer resp.Body.Close()
+				_, err = io.Copy(out, resp.Body)
+				if err != nil {
+					log.Println(err)
+					return
+				}
+			}
+		}
+	}
 }
 
 func ImageResponse(count int, l []string) (response []CQMessage, err error) {
