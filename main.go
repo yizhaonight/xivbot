@@ -12,8 +12,8 @@ func main() {
 	var start = flag.Bool("pprof", false, "Switch for pprof")
 	flag.Parse()
 	if *start {
-		runtime.SetMutexProfileFraction(1) // 开启对锁调用的跟踪
-		runtime.SetBlockProfileRate(1)     // 开启对阻塞操作的跟踪
+		runtime.SetMutexProfileFraction(1) // track for locks
+		runtime.SetBlockProfileRate(1)     // track for blocks
 		go func() {
 			http.ListenAndServe(":6060", nil)
 		}()
