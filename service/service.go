@@ -3,10 +3,13 @@ package service
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -64,5 +67,39 @@ func SendGroupMsg(msg interface{}, groupID int64) {
 	_, err = http.Post(url+api, "application/json", bytes.NewBuffer(r))
 	if err != nil {
 		log.Println(err)
+	}
+}
+
+func ImageResponse(count int, l []string) (response []CQMessage, err error) {
+	if count > 5 {
+		err = errors.New("仅支持最多5张")
+		return
+	}
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < count; i++ {
+		response = append(response, CQMessage{
+			Type: "image",
+			Data: CQImage{
+				File: l[rand.Intn(len(l))],
+			},
+		})
+	}
+	return
+}
+
+func Reply(msgID int32, text string) []CQMessage {
+	return []CQMessage{
+		{
+			Type: "reply",
+			Data: CQReply{
+				ID: msgID,
+			},
+		},
+		{
+			Type: "text",
+			Data: CQText{
+				Text: text,
+			},
+		},
 	}
 }
