@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	var start = flag.Bool("pprof", false, "Switch for pprof")
+	var start = flag.Bool("pprof", false, "enable this arg to turn on pprof debugging")
 	flag.Parse()
 	if *start {
 		runtime.SetMutexProfileFraction(1) // track for locks
