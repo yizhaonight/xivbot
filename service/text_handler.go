@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -33,6 +34,7 @@ func PixivHandler(msg Request) {
 	m.Lock()
 	// Query pixiv pictures
 	if ok, _ := regexp.MatchString(`^(!|！)色图`, msg.Message); ok {
+		var response interface{}
 		split := strings.Split(msg.Message, " ")
 		ero := models.Ero{}
 		eros, err := ero.Find()
@@ -47,14 +49,20 @@ func PixivHandler(msg Request) {
 					SendGroupMsg(response, msg.GroupID)
 					return
 				}
+			} else if count, e := strconv.Atoi(split[1]); e == nil {
+				for i := 0; i < count; i++ {
+					response, err = ImageResponse(count, eros)
+					if err != nil {
+						response = err.Error()
+					}
+				}
 			}
-		}
-		rand.Seed(time.Now().UnixNano())
-		response := CQMessage{
-			Type: "image",
-			Data: CQImage{
-				File: eros[rand.Intn(len(eros))],
-			},
+		} else if len(split) == 1 {
+			response, err = ImageResponse(1, eros)
+			if err != nil {
+				log.Println(err)
+				return
+			}
 		}
 		SendGroupMsg(response, msg.GroupID)
 	}
@@ -105,4 +113,21 @@ func PixivHandler(msg Request) {
 
 func SenpaiHandler(msg Request) {
 
+}
+
+func ImageResponse(count int, l []string) (response []CQMessage, err error) {
+	if count > 5 {
+		err = errors.New("仅支持最多5张")
+		return
+	}
+	rand.Seed(time.Now().UnixNano())
+	for i := 0; i < count; i++ {
+		response = append(response, CQMessage{
+			Type: "image",
+			Data: CQImage{
+				File: l[rand.Intn(len(l))],
+			},
+		})
+	}
+	return
 }
