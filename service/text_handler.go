@@ -26,7 +26,13 @@ func init() {
 }
 
 func KeywordHandler(msg Request) {
-
+	m := new(sync.Mutex)
+	m.Lock()
+	if ok, _ := regexp.MatchString(`^(?:!|！|\/|-|--)help$`, msg.Message); ok {
+		response := Help
+		SendGroupMsg(response, msg.GroupID)
+	}
+	m.Unlock()
 }
 
 func PixivHandler(msg Request) {
