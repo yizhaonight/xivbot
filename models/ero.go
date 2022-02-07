@@ -9,7 +9,8 @@ func init() {
 }
 
 type Ero struct {
-	Src string
+	Src        string
+	CreateTime int64
 }
 
 func (p Ero) FindOne() error {
@@ -22,6 +23,11 @@ func (p Ero) Find() (data []string, err error) {
 	for _, v := range eroList {
 		data = append(data, v.Src)
 	}
+	return
+}
+
+func (p Ero) FindAll() (data []Ero, err error) {
+	err = util.DB.Find(&data).Error
 	return
 }
 

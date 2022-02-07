@@ -10,6 +10,10 @@ import (
 	"xivbot/util"
 )
 
+func init() {
+	handlers = append(handlers, RuleHandler)
+}
+
 func RuleHandler(msg Request) {
 	m := new(sync.Mutex)
 	m.Lock()

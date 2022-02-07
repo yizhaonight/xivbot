@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 	"xivbot/models"
 	"xivbot/util"
 
@@ -87,7 +88,8 @@ func PixivHandler(msg Request) {
 					return
 				}
 				ero := models.Ero{
-					Src: Url + "/pixiv/" + file,
+					Src:        Url + "/pixiv/" + file,
+					CreateTime: time.Now().UnixMilli(),
 				}
 				err = ero.Insert()
 				if err != nil {

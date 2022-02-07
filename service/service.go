@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"xivbot/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,6 +23,7 @@ func Run(port string) {
 	msgMap = make(map[int32]int)
 	engine := gin.Default()
 	engine.POST("/", Handler())
+	engine.GET("/images", ImgHandler())
 	engine.Run(port)
 }
 
@@ -50,6 +52,18 @@ func Handler() gin.HandlerFunc {
 			go v(msg)
 		}
 		m.Unlock()
+	}
+}
+
+func ImgHandler() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ero := models.Ero{}
+		eros, err := ero.FindAll()
+		if err != nil {
+			log.Println(err)
+		}
+		ctx.Header("Access-Control-Allow-Origin", "*")
+		ctx.JSON(200, eros)
 	}
 }
 
