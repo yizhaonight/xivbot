@@ -1,0 +1,7 @@
+[Unit]
+Description=xivbot server
+
+[Service]
+ExecStart=/etc/cqhttp/xivbot/xivbot
+KillMode=process
+Restart=on-failure

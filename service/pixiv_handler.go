@@ -57,6 +57,7 @@ func PixivHandler(msg Request) {
 			}
 		}
 		SendGroupMsg(response, msg.GroupID)
+		return
 	}
 
 	// Add pixiv pictures

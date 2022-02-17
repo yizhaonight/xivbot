@@ -25,6 +25,11 @@ func KeywordHandler(msg Request) {
 		SendGroupMsg(response, msg.GroupID)
 		return
 	}
+	if ok, _ := regexp.MatchString(`^\#查询你群男同浓度$`, msg.Message); ok {
+		response := Reply(msg.MessageID, "114514%")
+		SendGroupMsg(response, msg.GroupID)
+		return
+	}
 
 	m.Unlock()
 }
