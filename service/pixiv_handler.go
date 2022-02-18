@@ -25,13 +25,16 @@ func PixivHandler(msg Request) {
 	m := new(sync.Mutex)
 	m.Lock()
 	// Query pixiv pictures
-	if ok, _ := regexp.MatchString(`^(!|！)色图`, msg.Message); ok {
+	if ok, _ := regexp.MatchString(`^(!|！)\s*色图`, msg.Message); ok {
 		var response interface{}
-		split := strings.Split(msg.Message, " ")
+		split := strings.Fields(msg.Message)
 		ero := models.Ero{}
 		eros, err := ero.Find()
 		if err != nil {
 			log.Println(err)
+		}
+		if len(split) > 1 && split[1] == "色图" {
+			split = split[1:]
 		}
 		if len(split) > 1 {
 			if okk, _ := regexp.MatchString(`^--`, split[1]); okk {
