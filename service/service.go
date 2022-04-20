@@ -24,6 +24,7 @@ func Run(port string) {
 	engine := gin.Default()
 	engine.POST("/", Handler())
 	engine.GET("/images", ImgHandler())
+	engine.DELETE("/images/:id", ImgDeleteHandler())
 	engine.Run(port)
 }
 
@@ -64,6 +65,12 @@ func ImgHandler() gin.HandlerFunc {
 		}
 		ctx.Header("Access-Control-Allow-Origin", "*")
 		ctx.JSON(200, eros)
+	}
+}
+
+func ImgDeleteHandler() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
 	}
 }
 

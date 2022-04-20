@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 	"sync"
 	"xivbot/util"
 
@@ -27,6 +28,18 @@ func KeywordHandler(msg Request) {
 	}
 	if ok, _ := regexp.MatchString(`^\#查询你群男同浓度$`, msg.Message); ok {
 		response := Reply(msg.MessageID, "114514%")
+		SendGroupMsg(response, msg.GroupID)
+		return
+	}
+
+	// if strings.Contains(msg.Message, "原神") {
+	// 	response := Reply(msg.MessageID, "原批爬")
+	// 	SendGroupMsg(response, msg.GroupID)
+	// 	return
+	// }
+
+	if strings.Contains(msg.Message, "granbluefantasy.jp") {
+		response := Reply(msg.MessageID, "骑空士爬")
 		SendGroupMsg(response, msg.GroupID)
 		return
 	}
